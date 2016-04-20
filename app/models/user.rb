@@ -1,5 +1,9 @@
 class User < ActiveRecord::Base
+
   attr_accessor :remember_token, :activation_token, :reset_token
+
+  has_many :microposts, dependent: :destroy
+
   before_save   :downcase_email
   before_create :create_activation_digest
 
@@ -34,6 +38,11 @@ class User < ActiveRecord::Base
     digest = send("#{attribute}_digest")
     return false if digest.nil?
     BCrypt::Password.new(digest).is_password?(token)
+  end
+
+  # Defines a proto-feed
+  def feed
+    Micropost.where("user_id = ?", id)
   end
 
   def forget
